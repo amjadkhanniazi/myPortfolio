@@ -13,6 +13,7 @@ const router = express.Router();
 // Public routes (no authentication required)
 router.post('/register', register);
 router.post('/login', login);
+router.get('/me', protect, getMe);
 
 // Protected routes (authentication required)
 router.get('/me', protect, getMe);
