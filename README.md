@@ -1,146 +1,195 @@
-# Portfolio Management Platform
-
-## 1. Executive Summary
-This project proposes the development of a **Portfolio Management Platform** that allows individuals to manage and showcase professional information such as profiles, skills, projects, experience, education, and services through a secure, scalable backend system.
-
-The platform is designed to be **content-driven, modular, and future‑proof**, enabling quick updates without code changes and supporting growth from a single personal portfolio to a multi‑user SaaS‑style system.
+# 🏥 Portfolio Project Backend API Documentation
 
 ---
 
-## 2. Problem Statement
-Most portfolio websites today suffer from one or more of the following issues:
-- Content updates require developer involvement
-- Poor separation between user data and site configuration
-- Limited scalability and reusability
-- Weak session management and security
+## 🚀 Features
 
-This results in **higher maintenance cost**, **slower iteration**, and **poor long‑term scalability**.
+- **User Registration** — Register with email + password (password is hashed)
+- **User Login** — Verify credentials and receive JWT token
+- **Get Current User** — Fetch authenticated user profile (`getMe`)
 
 ---
 
-## 3. Proposed Solution
-The proposed system is a **backend‑driven portfolio management platform** where:
-- Each user has a secure account and session‑based authentication
-- All portfolio sections are managed via structured database entities
-- Visibility, ordering, and feature flags are controlled dynamically
-- Site‑level branding, SEO, and analytics are centrally configurable
+## 🛠️ Tech Stack
 
-This allows both **technical and non‑technical users** to manage content efficiently.
-
----
-
-## 4. System Overview (High Level)
-
-### Core Components
-- **Authentication & Session Management**
-- **Profile & Personal Information Management**
-- **Portfolio Content Modules** (Skills, Projects, Experience, Education, Services)
-- **Public Contact Handling**
-- **Site Configuration & Settings**
-
-Each component is isolated but linked through a single `User` entity, ensuring clean ownership and access control.
+- **Runtime:** Node.js
+- **Framework:** Express
+- **Database:** MongoDB (Mongoose)
+- **Auth:** JWT (`jsonwebtoken`)
+- **Hashing:** `bcryptjs`
 
 ---
 
-## 5. Database Design Summary
+## ▶️ Running the Project
 
-### User & Security
-- **User**: Central entity storing authentication
-- **Session**: Token‑based session tracking with expiration control
+**Production:**
+```bash
+npm dev
+```
 
-This ensures:
-- Secure login
-- Multi‑device session support
-- Easy session revocation
-
----
-
-### Profile & Content Management
-Each major portfolio section is stored as a **separate collection**, linked to the user:
-
-- **Profile** – Core identity and branding
-- **About** – Personal summary and highlights
-- **Skills** – Categorized skills with proficiency levels
-- **Projects** – Portfolio items with GitHub and live links
-- **Education** – Academic background
-- **Experience** – Professional work history
-- **Services** – Offered services or expertise areas
-
-Key design benefits:
-- Independent visibility control (`is_visible`)
-- Custom display ordering
-- Easy future expansion (new sections can be added without refactoring)
+**Development:**
+```bash
+npm run dev
+```
 
 ---
 
-### Contact & Communication
-- **Contact** entity stores messages submitted via public contact forms
-- Includes metadata such as IP address and read status
+## ⚙️ Environment Variables
 
-This allows:
-- Lead tracking
-- Spam analysis
+Create a `.env` file and set at least:
 
----
+```env
+JWT_SECRET=your_super_secret_key
+MONGO_URL=Connection String
+```
 
-### Site Configuration
-- **SiteSettings** entity controls:
-  - Branding (logo, favicon)
-  - Theme configuration
-  - SEO settings
-  - Analytics integration
-  - Maintenance mode
-
-This eliminates hard‑coded configuration and supports multi‑site or white‑label use cases.
+(Your database connection variables depend on your app setup, e.g. `MONGO_URL`.)
 
 ---
 
-## 6. Key Use Cases
+## 📚 API Documentation
 
-### For Portfolio Owner / Admin
-- Log in securely
-- Update profile, skills, and projects without redeployment
-- Reorder or hide sections dynamically
-- Enable maintenance mode
-- Manage incoming contact requests
+#### Base URL
+```
+https://my-portfoliooooo.vercel.app/
+```
 
-### For Public Visitors
-- View a clean, structured portfolio
-- Browse projects and experience
-- Submit inquiries via contact form
+#### Response Format (General)
+Most responses follow this structure:
 
----
+```json
+{
+  "status": "success",
+  "message": "Some message",
+  "data": {}
+}
+```
 
-## 7. Technical Stack (Proposed)
-- **Backend**: Node.js + Express.js
-- **Database**: MongoDB (schema‑driven, flexible)
-- **Authentication**: JWT + session tracking
-- **Deployment Ready**: Cloud‑friendly (Vercel / AWS / Render)
+Errors typically look like:
 
-This stack ensures **fast development**, **low cost**, and **high scalability**.
-
----
-
-## 8. Scalability & Future Scope
-This architecture supports future expansion such as:
-- Admin dashboards
-- Analytics reporting
-- Role‑based access control
-- CMS‑style frontend panel
+```json
+{
+  "status": "error",
+  "message": "Error details"
+}
+```
 
 ---
 
-## 9. Business Value & Approval Justification
+## 🔐 Authentication
 
-### Why This Project Should Be Approved
-- ✅ Clean and professional system design
-- ✅ Reusable across individuals
-- ✅ Low maintenance cost
-- ✅ Strong security foundation
+#### Auth Header (Protected Routes)
+For protected endpoints, send the JWT token:
 
-This project is not just a portfolio — it is a **scalable content management foundation** that can evolve into a full product.
+**Header:**
+`Authorization: Bearer <token>`
+
+Example:
+`Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...`
 
 ---
 
-## 10. Conclusion
-The proposed Portfolio Management Platform demonstrates strong architectural thinking, practical business value, and long‑term scalability. It is well‑suited for approval as an internal project, or production‑ready system.
+## 🔐 Authentication Endpoints
+
+> Note: Your controller functions are `register`, `login`, `getMe`, `logout`, `changePassword`.  
+> The exact route paths depend on your router setup. Below is a **recommended/typical** mapping under `/api/auth`.
+
+---
+
+### Register User
+
+**Endpoint:** `POST /api/auth/register`  
+**Description:** Register a new user account and receive a JWT token.
+
+**Request Body:**
+```json
+{
+  "email": "user@example.com",
+  "password": "securePassword123"
+}
+```
+
+**Success Response (201):**
+```json
+{
+  "status": "success",
+  "message": "User registered successfully",
+  "data": {
+    "user": {
+      "id": "65f1c2a8a1b2c3d4e5f6a789",
+      "email": "user@example.com"
+    },
+    "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+  }
+}
+```
+
+**Status Codes:**
+- `201` — Created successfully
+- `400` — User already exists with this email
+- `500` — Server error
+
+---
+
+### Login User
+
+**Endpoint:** `POST /api/auth/login`  
+**Description:** Authenticate user and receive JWT token.
+
+**Request Body:**
+```json
+{
+  "email": "user@example.com",
+  "password": "securePassword123"
+}
+```
+
+**Success Response (200):**
+```json
+{
+  "status": "success",
+  "message": "Login successful",
+  "data": {
+    "user": {
+      "id": "65f1c2a8a1b2c3d4e5f6a789",
+      "email": "user@example.com",
+      "last_login": "2026-01-22T12:34:56.789Z"
+    },
+    "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+  }
+}
+```
+
+**Status Codes:**
+- `200` — Login successful
+- `401` — Invalid email or password
+- `500` — Server error
+
+---
+
+### Get Current User (Me)
+
+**Endpoint:** `GET /api/auth/me`  
+**Description:** Return the currently authenticated user (requires JWT).
+
+**Headers:**
+- `Authorization: Bearer <token>`
+
+**Success Response (200):**
+```json
+{
+  "status": "success",
+  "data": {
+    "user": {
+      "id": "65f1c2a8a1b2c3d4e5f6a789",
+      "email": "user@example.com",
+      "last_login": "2026-01-22T12:34:56.789Z"
+    }
+  }
+}
+```
+
+**Status Codes:**
+- `200` — Success
+- `404` — User not found
+- `500` — Server error
