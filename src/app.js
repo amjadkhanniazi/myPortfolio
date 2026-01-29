@@ -7,7 +7,6 @@ import rateLimit from 'express-rate-limit';
 import connectDB from './config/db.js';
 import authRoutes from './routes/authRoutes.js';
 import profileRoutes from './routes/profileRoutes.js';
-import path from 'path';
 import swaggerUi from 'swagger-ui-express';
 import swaggerSpec from './config/swagger.js';
 
@@ -29,25 +28,11 @@ app.use(cors({
   credentials: true,
 }));
 
-// ⚠️ IMPORTANT: Configure helmet to allow Swagger UI scripts
-app.use(
-  helmet({
-    contentSecurityPolicy: {
-      directives: {
-        defaultSrc: ["'self'"],
-        scriptSrc: ["'self'", "'unsafe-inline'", "'unsafe-eval'"],
-        styleSrc: ["'self'", "'unsafe-inline'"],
-        imgSrc: ["'self'", "data:", "https:"],
-      },
-    },
-  })
-);
-
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(globalLimiter);
 
-// Swagger UI setup - MUST come before other routes
+// ⚠️ SWAGGER MUST COME BEFORE HELMET
 const swaggerOptions = {
   customCss: '.swagger-ui .topbar { display: none }',
   customSiteTitle: 'Portfolio API Docs',
@@ -57,6 +42,16 @@ const swaggerOptions = {
 };
 
 app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec, swaggerOptions));
+
+// Apply helmet AFTER Swagger route (so it doesn't affect Swagger)
+app.use((req, res, next) => {
+  if (req.path.startsWith('/api-docs')) {
+    return next();
+  }
+  helmet({
+    contentSecurityPolicy: false, // Disable CSP for simplicity
+  })(req, res, next);
+});
 
 // 🔒 Ensure DB connection (Vercel-safe)
 app.use(async (req, res, next) => {
