@@ -6,10 +6,15 @@ import rateLimit from 'express-rate-limit';
 
 import connectDB from './config/db.js';
 import authRoutes from './routes/authRoutes.js';
+import profileRoutes from './routes/profileRoutes.js';
+import path from 'path';
+
 
 dotenv.config();
 
 const app = express();
+
+// app.use('/uploads', express.static(path.join(process.cwd(), 'uploads')));
 
 /* -------------------- RATE LIMIT (SERVERLESS SAFE) -------------------- */
 const globalLimiter = rateLimit({
@@ -54,6 +59,7 @@ app.get('/', (req, res) => {
 
 // API routes
 app.use('/api/auth', authRoutes);
+app.use('/api/profile', profileRoutes);
 
 // 404 handler
 app.use((req, res) => {

@@ -32,14 +32,23 @@ const profileSchema = new mongoose.Schema({
         minlength: 3
     },
     profile_image_url: {
-        type: String
+        type: String,
+        default: null
     },
     cv_url: {
-        type: String
+        type: String,
+        default: null
     },
     social_links: [
         {
-            type: String
+            platform: {
+                type: String,
+                required: true
+            },
+            url: {
+                type: String,
+                required: true
+            }
         }
     ],
     created_at: {
