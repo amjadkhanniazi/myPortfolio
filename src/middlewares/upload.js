@@ -114,7 +114,7 @@ const cvFilter = (req, file, cb) => {
     }
 };
 
-export const uploadProfileImage = multer({
+export const uploadProfileImgMiddleWare = multer({
     storage: storage,
     limits: {
         fileSize: 2 * 1024 * 1024 // 5MB
@@ -122,7 +122,7 @@ export const uploadProfileImage = multer({
     fileFilter: imageFilter
 });
 
-export const uploadCV = multer({
+export const uploadCVMiddleWare = multer({
     storage: storage,
     limits: {
         fileSize: 3 * 1024 * 1024 // 10MB
