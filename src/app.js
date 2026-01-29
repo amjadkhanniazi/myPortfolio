@@ -3,11 +3,9 @@ import cors from 'cors';
 import helmet from 'helmet';
 import dotenv from 'dotenv';
 import rateLimit from 'express-rate-limit';
-
 import connectDB from './config/db.js';
 import authRoutes from './routes/authRoutes.js';
 import profileRoutes from './routes/profileRoutes.js';
-import swaggerUi from 'swagger-ui-express';
 import swaggerSpec from './config/swagger.js';
 
 dotenv.config();
@@ -28,29 +26,57 @@ app.use(cors({
   credentials: true,
 }));
 
+app.use(helmet({
+  contentSecurityPolicy: false, // Disable for Swagger
+}));
+
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(globalLimiter);
 
-// ⚠️ SWAGGER MUST COME BEFORE HELMET
-const swaggerOptions = {
-  customCss: '.swagger-ui .topbar { display: none }',
-  customSiteTitle: 'Portfolio API Docs',
-  swaggerOptions: {
-    persistAuthorization: true,
-  }
-};
+// ✅ Swagger Documentation Routes (Vercel-compatible)
+app.get('/api-docs.json', (req, res) => {
+  res.setHeader('Content-Type', 'application/json');
+  res.send(swaggerSpec);
+});
 
-app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec, swaggerOptions));
-
-// Apply helmet AFTER Swagger route (so it doesn't affect Swagger)
-app.use((req, res, next) => {
-  if (req.path.startsWith('/api-docs')) {
-    return next();
-  }
-  helmet({
-    contentSecurityPolicy: false, // Disable CSP for simplicity
-  })(req, res, next);
+app.get('/api-docs', (req, res) => {
+  res.send(`
+    <!DOCTYPE html>
+    <html lang="en">
+    <head>
+      <meta charset="UTF-8">
+      <title>Portfolio API Documentation</title>
+      <link rel="stylesheet" href="https://unpkg.com/swagger-ui-dist@5.11.0/swagger-ui.css" />
+      <style>
+        .swagger-ui .topbar { display: none; }
+      </style>
+    </head>
+    <body>
+      <div id="swagger-ui"></div>
+      <script src="https://unpkg.com/swagger-ui-dist@5.11.0/swagger-ui-bundle.js"></script>
+      <script src="https://unpkg.com/swagger-ui-dist@5.11.0/swagger-ui-standalone-preset.js"></script>
+      <script>
+        window.onload = function() {
+          window.ui = SwaggerUIBundle({
+            url: '/api-docs.json',
+            dom_id: '#swagger-ui',
+            deepLinking: true,
+            presets: [
+              SwaggerUIBundle.presets.apis,
+              SwaggerUIStandalonePreset
+            ],
+            plugins: [
+              SwaggerUIBundle.plugins.DownloadUrl
+            ],
+            layout: "StandaloneLayout",
+            persistAuthorization: true
+          });
+        };
+      </script>
+    </body>
+    </html>
+  `);
 });
 
 // 🔒 Ensure DB connection (Vercel-safe)
