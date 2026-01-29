@@ -18,12 +18,12 @@ const options = {
     },
     servers: [
       {
-        url: 'http://localhost:5000',
-        description: 'Development server'
+        url: 'https://my-portfoliooooo.vercel.app',
+        description: 'Production server'
       },
       {
-        url: 'https://my-portfoliooooo.vercel.app',
-        description: 'Production server (Update after deployment)'
+        url: 'http://localhost:5000',
+        description: 'Development server'        
       }
     ],
     components: {
