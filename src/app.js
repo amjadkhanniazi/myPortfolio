@@ -11,44 +11,54 @@ import path from 'path';
 import swaggerUi from 'swagger-ui-express';
 import swaggerSpec from './config/swagger.js';
 
-
 dotenv.config();
 
 const app = express();
 
-// app.use('/uploads', express.static(path.join(process.cwd(), 'uploads')));
-
 /* -------------------- RATE LIMIT (SERVERLESS SAFE) -------------------- */
 const globalLimiter = rateLimit({
-  windowMs: 60 * 1000,      // 1 minute
-  max: 50,                
+  windowMs: 60 * 1000,
+  max: 50,
   standardHeaders: true,
   legacyHeaders: false,
 });
 
 // Global middlewares
-app.use(cors());
-app.use(helmet());
-app.use(express.json());
-app.use(express.urlencoded({ extended: true }));
+app.use(cors({
+  origin: '*',
+  credentials: true,
+}));
+
+// ⚠️ IMPORTANT: Configure helmet to allow Swagger UI scripts
 app.use(
-  cors({
-    origin: '*',
-    credentials: true,
+  helmet({
+    contentSecurityPolicy: {
+      directives: {
+        defaultSrc: ["'self'"],
+        scriptSrc: ["'self'", "'unsafe-inline'", "'unsafe-eval'"],
+        styleSrc: ["'self'", "'unsafe-inline'"],
+        imgSrc: ["'self'", "data:", "https:"],
+      },
+    },
   })
 );
+
+app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
 app.use(globalLimiter);
 
-// Swagger UI setup
+// Swagger UI setup - MUST come before other routes
 const swaggerOptions = {
   customCss: '.swagger-ui .topbar { display: none }',
-  customSiteTitle: 'Portfolio API Docs'
+  customSiteTitle: 'Portfolio API Docs',
+  swaggerOptions: {
+    persistAuthorization: true,
+  }
 };
 
 app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec, swaggerOptions));
 
-
-// 🔑 Ensure DB connection (Vercel-safe)
+// 🔒 Ensure DB connection (Vercel-safe)
 app.use(async (req, res, next) => {
   try {
     await connectDB();
