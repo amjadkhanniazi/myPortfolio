@@ -7,6 +7,14 @@ import connectDB from './config/db.js';
 import authRoutes from './routes/authRoutes.js';
 import profileRoutes from './routes/profileRoutes.js';
 import swaggerSpec from './config/swagger.js';
+import aboutRoutes from './routes/aboutRoutes.js';
+import contactRoutes from './routes/contactRoutes.js';
+import educationRoutes from './routes/educationRoutes.js';
+import experienceRoutes from './routes/experienceRoutes.js';
+import projectRoutes from './routes/projectRoutes.js';
+import serviceRoutes from './routes/serviceRoutes.js';
+import siteSettingsRoutes from './routes/siteSettingsRoutes.js';
+import skillRoutes from './routes/skillRoutes.js';
 
 dotenv.config();
 
@@ -101,6 +109,14 @@ app.get('/', (req, res) => {
 // API routes
 app.use('/api/auth', authRoutes);
 app.use('/api/profile', profileRoutes);
+app.use('/api/about', aboutRoutes);
+app.use('/api/contact', contactRoutes);
+app.use('/api/education', educationRoutes);
+app.use('/api/experience', experienceRoutes);
+app.use('/api/project', projectRoutes);
+app.use('/api/service', serviceRoutes);
+app.use('/api/site-settings', siteSettingsRoutes);
+app.use('/api/skill', skillRoutes);
 
 // 404 handler
 app.use((req, res) => {
